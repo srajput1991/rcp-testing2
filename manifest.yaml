@@ -1,0 +1,78 @@
+apphooks: {postdestroy: python3 postdestroy.py, precreate: python3.4 precreate.py}
+clone: enabled
+environment: "rcp-test"
+name: python-test
+numa_aware: true
+order:
+  compute: {memory: 2G}
+  annotations: { sidecar.istio.io/inject: '"false"',
+                 prometheus.io/scrape: "\"true\"",
+                 prometheus.io/port: "\"8009\"",
+                 prometheus.io/path: "/actuator/prometheus",
+                 prometheus.io/scheme: "http" }
+  env: 
+    LOG_PATH: "/bss_mno/order-management"
+  hpa:
+    metrics:
+    - pods:
+        metric: {name: cpu_usage}
+        target: {averageValue: 500m, type: AverageValue}
+      type: Pods
+    - resource:
+        name: memory
+        target: {averageUtilization: 50, type: Utilization}
+      type: Resource
+  image: {engine: docker, entrypoint: entry.sh, imagePullPolicy: IfNotPresent, init_mode: false,
+    name: sachin/b2b_bss/dep_order-management, version: 2023-02-01-2434}
+  labels:
+    cnf_id: cnf_test
+    ns_id: ns_id
+    cnfc_id: cnfc_id
+    app: order-management
+  volumeMounts:
+  - {mountPath: /config/, name: order-management-env-config}
+  - {mountPath: /bss_mno/, name: nfs-log-volume}
+  volumes:
+  - name: nfs-log-volume
+    nfs: {path: /export/staging3_mno/bss_mno/, server: '[1.2.3.4]'}
+  - configMap:
+      items:
+      - {key: bootstrap.yml, path: bootstrap.yml}
+      name: order-management
+    name: order-management-env-config
+  #check is service ready to accept traffic
+ # readinessProbe:
+ #  httpGet:
+ #    port: 8009
+ #    path: /actuator/health/readiness
+ #  initialDelaySeconds: 90
+ #  periodSeconds: 30
+ #  successThreshold: 3
+ #  timeoutSeconds: 10
+  # liveness probe
+ # livenessProbe:
+ #  httpGet:
+ #    port: 8009
+ #    path: /actuator/health/liveness
+ #  initialDelaySeconds: 90
+ #  periodSeconds: 60
+ #  timeoutSeconds: 10
+ #  failureThreshold: 2
+#  startupProbe:
+#   httpGet:
+#     port: 8009
+#     path: /actuator
+#   failureThreshold: 9
+#   periodSeconds: 20
+#   initialDelaySeconds: 150
+#   timeoutSeconds: 5
+  multinode: true
+  multinode_max: 3
+  multinode_min: 2
+  multinode_value: 3
+  name: order-management
+  norootfs: true
+  rolling_upgrade: true
+roles: [order]
+snapshot: enabled
+version: '1.0'
