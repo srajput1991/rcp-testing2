@@ -41,23 +41,23 @@ order:
       name: order-management
     name: order-management-env-config
   #check is service ready to accept traffic
- # readinessProbe:
- #  httpGet:
- #    port: 8009
- #    path: /actuator/health/readiness
- #  initialDelaySeconds: 90
- #  periodSeconds: 30
- #  successThreshold: 3
- #  timeoutSeconds: 10
-  # liveness probe
- # livenessProbe:
- #  httpGet:
- #    port: 8009
- #    path: /actuator/health/liveness
- #  initialDelaySeconds: 90
- #  periodSeconds: 60
- #  timeoutSeconds: 10
- #  failureThreshold: 2
+ readinessProbe:
+  httpGet:
+    port: 8009
+    path: /actuator/health/readiness
+  initialDelaySeconds: 90
+  periodSeconds: 30
+  successThreshold: 3
+  timeoutSeconds: 10
+  liveness probe
+ livenessProbe:
+  httpGet:
+    port: 8009
+    path: /actuator/health/liveness
+  initialDelaySeconds: 90
+  periodSeconds: 60
+  timeoutSeconds: 10
+  failureThreshold: 2
 #  startupProbe:
 #   httpGet:
 #     port: 8009
